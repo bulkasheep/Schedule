@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="shortcut icon" href="../css/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Конструктор расписания КГПК - раписание</title>
+</head>
+<body>
+    <div id="anchor"></div>
+    <div id="pointer"></div>
+
+    <!--  -->
+    <!--  -->
+    <!-- Экран для редактирования расписания -->
+    <!--  -->
+    
+    <script id="schedule-constructor" type="text/x-handlebars-template">
+        <div class="scroll-viewport">
+            <table id="subjects">
+                <colgroup>
+                    <col>
+                    {{#each weekdays}}
+                    {{#each ../lessons as | lesson |}}
+                    <col style="min-width: 6ch; width: 6ch;">
+                    {{/each}}
+                    {{/each}}
+                </colgroup>
+                <tr>
+                    <th title="* Не отображаются дисциплины? Кликните по названию группы или по любой ячейке под ним, чтобы выбрать её для редактирования. Тогда вы сможете взаимодействовать с этой таблицей!
+                    * Нужно отменить выбор? Наведите мышь на ненужную строчку в талице справа и кликните по ней!" class="sticky top-0 left-0 z-2 cell-hover-effect" rowspan="2"
+                        data-b-a-s="medium"></th>
+                    {{#each weekdays as | weekday |}}
+                    <th class="sticky top-0" colspan="7"
+                        data-b-t-s="medium"
+                        data-b-r-s="medium"
+                        data-b-b-s="thin">{{weekday.name}}</th>
+                    {{/each}}
+                </tr>
+                <tr>
+                {{#each weekdays}}
+                {{#each ../lessons as | lesson |}}
+                    <th class="sticky top-20"
+                        data-b-r-s="{{#if @last}}medium{{else}}thin{{/if}}"
+                        data-b-b-s="medium">{{lesson}}</th>
+                {{/each}}
+                {{/each}}
+                </tr>
+                {{#each sheets.list as | sheet |}}
+                {{#each sheet.groups as | id |}}
+                <tbody class="subject-list">
+                    {{#with (lookup ../../groups.list id) as | group |}}
+                    <tr>
+                        <td class="display" colspan="50" data-group="{{id}}"></td>
+                    </tr>
+                    {{#each group.subjects as | subject s |}}
+                    <tr>
+                        <th class="subject sticky left-0"
+                            data-f-sz="10"
+                            data-a-h="left"
+                            data-b-r-s="medium"
+                            data-b-l-s="medium">
+                            {{#with (lookup ../../../../subjects.list s)}}
+                            {{this.title}}
+                            {{/with}}
+                        </th>
+                        {{#each ../../../../weekdays as | weekday w |}}
+                        {{#each ../../../../../lessons as | lesson |}}
+                        <td class="cell-hover-effect" data-group="{{id}}" data-weekday="{{w}}" data-lesson="{{lesson}}" data-part="0" data-type="s" data-subject="{{s}}"
+                            data-b-r-s="{{#if @last}}medium{{else}}thin{{/if}}">
+                        </td>
+                        {{/each}}
+                        {{/each}}
+                    </tr>
+                    <tr>
+                        <th class="sticky left-0"
+                            data-f-sz="10"
+                            data-a-h="right"
+                            data-b-r-s="medium"
+                            data-b-l-s="medium">1п</th>
+                        {{#each ../../../../weekdays as | weekday w |}}
+                        {{#each ../../../../../lessons as | lesson |}}
+                        <td class="cell-hover-effect" data-group="{{id}}" data-weekday="{{w}}" data-lesson="{{lesson}}" data-part="1" data-type="s" data-subject="{{s}}"
+                            data-b-r-s="{{#if @last}}medium{{else}}thin{{/if}}">
+                        </td>
+                        {{/each}}
+                        {{/each}}
+                    </tr>
+                    <tr>
+                        <th class="sticky left-0"
+                            data-f-sz="10"
+                            data-a-h="right"
+                            data-b-r-s="medium"
+                            data-b-b-s="medium"
+                            data-b-l-s="medium">2п</th>
+                        {{#each ../../../../weekdays as | weekday w |}}
+                        {{#each ../../../../../lessons as | lesson |}}
+                        <td class="cell-hover-effect" data-group="{{id}}" data-weekday="{{w}}" data-lesson="{{lesson}}" data-part="2" data-type="s" data-subject="{{s}}"
+                            data-b-r-s="{{#if @last}}medium{{else}}thin{{/if}}"
+                            data-b-b-s="medium">
+                        </td>
+                        {{/each}}
+                        {{/each}}
+                    </tr>
+                    {{/each}}
+                    {{/with}}
+                </tbody>
+                {{/each}}
+                {{/each}}
+            </table>
+        </div>
+
+        <div class="scroll-viewport">
+            {{#each sheets.list as | sheet |}}
+            <table class="schedule-sheet" data-cols-width="3,3,6{{#each sheet.groups}},34,20,6{{/each}}" data-name="{{sheet.title}}">
+                <colgroup>
+                    <col style="min-width: 2ch; width: 2ch;">
+                    <col style="min-width: 2ch; width: 2ch;">
+                    <col style="min-width: 5ch; width: 5ch;">
+                    {{#each sheet.groups}}
+                    <col style="min-width: 24ch; width: 24ch;">
+                    <col style="min-width: 18ch; width: 18ch;">
+                    <col style="min-width: 4ch; width: 6ch;">
+                    {{/each}}
+                </colgroup>
+                <tr >
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    {{#each sheet.groups}}
+                    <td colspan="3" 
+                        data-a-h="right" 
+                        data-f-bold="true" 
+                        data-f-name="Times New Roman"
+                        data-f-sz="12">
+                        {{#if @last}}
+                        Утверждаю
+                        {{/if}}
+                    </td>
+                    {{/each}}
+                </tr>
+                <tr >
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    {{#each sheet.groups}}
+                    <td colspan="3"
+                        data-a-h="right" 
+                        data-f-bold="true" 
+                        data-f-name="Times New Roman"  
+                        data-f-sz="12">
+                        {{#if @last}}
+                        Директор ОБПОУ "КГПК"
+                        {{/if}}
+                    </td>
+                    {{/each}}
+                </tr>
+                <tr >
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    {{#each sheet.groups}}
+                    <td colspan="3" 
+                        data-a-h="right" 
+                        data-f-bold="true" 
+                        data-f-name="Times New Roman"
+                        data-f-sz="12">
+                        {{#if @last}}
+                        ____________ О.И.Морозова
+                        {{/if}}
+                    </td>
+                    {{/each}}
+                </tr>
+                <tr >
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    {{#each sheet.groups}}
+                    <td colspan="3">
+                    </td>
+                    {{/each}}
+                </tr>
+                <tr>
+                    <td class="date-header" colspan="{{mul 3 (add 1 sheet.groups.length)}}" 
+                        data-a-h="center" 
+                        data-a-v="middle"
+                        data-f-bold="true"
+                        data-f-name="Times New Roman"
+                        data-f-sz="16">
+                        Расписание замены занятий с {{#with (lookup ../weekdays 1)~}}{{day}}.{{month}}.{{year}}{{/with}} г. по {{#with (lookup ../weekdays 5)~}}{{day}}.{{month}}.{{year}}{{/with}} г.
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="{{mul 3 (add 1 sheet.groups.length)}}" 
+                        data-a-h="center" 
+                        data-a-v="middle"
+                        data-f-bold="true"
+                        data-f-name="Times New Roman"
+                        data-f-sz="16">
+                        Отделение "{{sheet.title}}"
+                    </td>
+                </tr>
+                <tr >
+                    <td colspan="3"></td>
+                    {{#each sheet.groups}}
+                    <td colspan="3">
+                    </td>
+                    {{/each}}
+                </tr>
+                <tr>
+                    <td class="sticky top-0 left-0 z-2" rowspan="2"
+                        data-a-h="center" 
+                        data-a-v="middle"
+                        data-a-text-rotation="90"
+                        data-f-bold="true"
+                        data-f-name="Times New Roman"
+                        data-f-sz="10"
+                        data-b-a-s="medium">День</td>
+                    <td class="sticky top-0 left-15 z-2" rowspan="2"
+                        data-a-h="center"
+                        data-a-v="middle"
+                        data-a-text-rotation="90" 
+                        data-f-bold="true"
+                        data-f-name="Times New Roman"
+                        data-f-sz="10"
+                        data-b-t-s="medium"
+                        data-b-r-s="medium"
+                        data-b-b-s="medium">Дата</td>
+                    <td class="sticky top-0 left-30 z-2" rowspan="2"
+                        data-a-h="center" 
+                        data-a-v="middle"
+                        data-f-bold="true" 
+                        data-a-wrap="true"
+                        data-f-name="Times New Roman"
+                        data-f-sz="8"
+                        data-b-t-s="medium"
+                        data-b-r-s="medium"
+                        data-b-b-s="medium">№ урока</td>
+                    {{#each sheet.groups as | id |}}
+                    {{#with (lookup ../../groups.list id)}}
+                    <td data-group="{{id}}" class="header-group sticky top-0" colspan="3"  
+                        data-a-h="center" 
+                        data-a-v="middle" 
+                        data-f-bold="true" 
+                        data-f-name="Times New Roman"
+                        data-f-sz="16"
+                        data-b-t-s="medium"
+                        data-b-r-s="medium"
+                        data-b-b-s="thin">{{name}}</td>
+                    {{/with}}
+                    {{/each}}
+                </tr>
+                <tr>
+                    {{#each sheet.groups as | id |}}
+                    {{#with (lookup ../../groups.list id)}}
+                    <td class="sticky top-21"
+                        data-a-h="center"
+                        data-a-v="middle"
+                        data-f-bold="true"
+                        data-f-name="Times New Roman"
+                        data-f-sz="9"
+                        data-b-r-s="thin"
+                        data-b-b-s="medium">Дисциплина/МДК</td>
+                    <td class="sticky top-21"
+                        data-a-h="center"
+                        data-a-v="middle"
+                        data-f-bold="true"
+                        data-f-name="Times New Roman"
+                        data-f-sz="9"
+                        data-b-r-s="thin"
+                        data-b-b-s="medium">Преподаватель</td>
+                    <td class="sticky top-21"
+                        data-a-h="center"
+                        data-a-v="middle"
+                        data-f-bold="true"
+                        data-f-name="Times New Roman"
+                        data-f-sz="9"
+                        data-b-r-s="medium"
+                        data-b-b-s="medium">каб.</td>
+                    {{/with}}
+                    {{/each}}
+                </tr>
+                {{#each ../weekdays as | weekday w |}}
+                {{#each ../../lessons as | lesson |}}
+                <tr data-weekday="{{w}}" data-exclude="false">
+                    {{#if @first}}
+                    <td class="weekday sticky left-0 weekday-excluding cell-hover-effect" rowspan="7"
+                        data-weekday="{{w}}"
+                        data-a-h="center"
+                        data-a-v="middle" 
+                        data-a-text-rotation="90" 
+                        data-f-bold="true" 
+                        data-f-name="Times New Roman"
+                        data-f-sz="10"
+                        data-b-b-s="medium"
+                        data-b-r-s="medium"
+                        data-b-l-s="medium">{{weekday.name}}</td>
+                    <td class="weekday sticky left-15 date weekday-excluding cell-hover-effect" rowspan="7"
+                        data-weekday="{{w}}"
+                        data-a-h="center" 
+                        data-a-v="middle" 
+                        data-a-text-rotation="90"
+                        data-f-bold="true" 
+                        data-f-name="Times New Roman"
+                        data-f-sz="10"
+                        data-b-r-s="medium"
+                        data-b-b-s="medium"
+                        data-t="d"
+                        data-num-fmt="d mmmm">{{weekday.month}}.{{weekday.day}}.{{weekday.year}}</td>
+                    {{/if}}
+                    <td class="lesson sticky left-30"
+                        data-a-h="center"
+                        data-a-v="middle"
+                        data-a-wrap="true"
+                        data-f-name="Times New Roman"
+                        data-f-sz="11"
+                        data-b-r-s="medium"
+                        data-b-b-s="{{#if @last}}medium{{else}}thin{{/if}}">{{lesson}} пара</td>
+                    {{#each sheet.groups as | id |}}
+                    <td class="cell-hover-effect"
+                        data-group="{{id}}"
+                        data-weekday="{{w}}"
+                        data-lesson="{{lesson}}"
+                        data-type="s"
+                        data-a-v="middle"
+                        data-a-wrap="true"
+                        data-f-bold="true"
+                        data-f-name="Arial Narrow"
+                        data-f-sz="12"
+                        data-b-r-s="thin"
+                        data-b-b-s="{{#if @../last}}medium{{else}}thin{{/if}}"><div data-part="1"></div><div data-part="0"></div><div data-part="2"></div></td>
+                    <td class="cell-hover-effect" 
+                        data-group="{{id}}"
+                        data-weekday="{{w}}"
+                        data-lesson="{{lesson}}"
+                        data-type="t"
+                        data-a-v="middle"
+                        data-a-wrap="true"
+                        data-f-bold="true"
+                        data-f-name="Arial Narrow"
+                        data-f-sz="12"
+                        data-b-r-s="thin"
+                        data-b-b-s="{{#if @../last}}medium{{else}}thin{{/if}}"><div data-part="1"></div><div data-part="0"></div><div data-part="2"></div></td>
+                    <td class="cell-hover-effect"
+                        data-group="{{id}}"
+                        data-weekday="{{w}}"
+                        data-lesson="{{lesson}}"
+                        data-type="c"
+                        data-a-h="center" 
+                        data-a-v="middle"
+                        data-a-wrap="true"
+                        data-f-bold="true"
+                        data-f-name="Arial Narrow"
+                        data-f-sz="12"
+                        data-b-r-s="medium"
+                        data-b-b-s="{{#if @../last}}medium{{else}}thin{{/if}}"><div data-part="1"></div><div data-part="0"></div><div data-part="2"></div></td>
+                    {{/each}}
+                </tr>
+                {{/each}}
+                {{/each}}
+                <tr >
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    {{#each sheet.groups}}
+                    <td colspan="3">
+                    </td>
+                    {{/each}}
+                </tr>
+                <tr >
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    {{#each sheet.groups}}
+                    <td colspan="3">
+                    </td>
+                    {{/each}}
+                </tr>
+                <tr >
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    {{#each sheet.groups}}
+                    <td colspan="3"
+                        data-f-bold="true" 
+                        data-f-name="Times New Roman"
+                        data-f-sz="12">
+                        {{#if @first}}
+                        Завуч О.Н.Шафоростова
+                        {{/if}}
+                    </td>
+                    {{/each}}
+                </tr>
+                <tr >
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    {{#each sheet.groups}}
+                    <td colspan="3">
+                    </td>
+                    {{/each}}
+                </tr>
+            </table>
+            {{/each}}
+        </div>
+
+        <div class="scroll-viewport">
+            <table id="teachers" data-name="Проверка преподавателей">
+                <colgroup>
+                    <col>
+                    {{#each weekdays}}
+                    {{#each ../lessons as | lesson |}}
+                    <col style="min-width: 8ch; width: 8ch;">
+                    {{/each}}
+                    {{/each}}
+                </colgroup>
+                <tr>
+                    <th title="* Ничего не происходит? Кликните по названию группы или по любой ячейке под ним, чтобы выбрать её для редактирования. Тогда вы сможете взаимодействовать с этой таблицей!
+                    * Нужно отменить выбор? Наведите мышь на ненужную строчку в таблице сверху справа и кликните по ней!" class="sticky top-0 left-0 z-2 cell-hover-effect" rowspan="2"
+                    data-b-a-s="medium"></th>
+                    {{#each weekdays as | weekday |}}
+                    <th class="weekday sticky top-0" colspan="7"
+                        data-b-t-s="medium"
+                        data-b-r-s="medium"
+                        data-b-b-s="thin">{{weekday.name}}</th>
+                    {{/each}}
+                </tr>
+                <tr>
+                {{#each weekdays}}
+                {{#each ../lessons as | lesson |}}
+                    <th class="lesson sticky top-20"
+                        data-b-r-s="{{#if @last}}medium{{else}}thin{{/if}}"
+                        data-b-b-s="medium">{{lesson}}</th>
+                    {{/each}}
+                    {{/each}}
+                </tr>
+                {{#each teachers.list as | teacher t |}}
+                <tr>
+                    <th class="teacher sticky left-0"
+                        data-b-r-s="medium"
+                        data-b-b-s="thin"
+                        data-b-l-s="medium">{{teacher.fio}}</th>
+                    {{#each ../weekdays as | weekday w |}}
+                    {{#each ../../lessons as | lesson |}}
+                    <td class="cell-hover-effect" data-weekday="{{w}}" data-lesson="{{lesson}}" data-type="t" data-teacher="{{t}}"
+                        data-b-r-s="{{#if @last}}medium{{else}}thin{{/if}}"
+                        data-b-b-s="thin"><div class="elements-cell" data-part="1"></div><div class="elements-cell" data-part="0"></div><div class="elements-cell" data-part="2"></div></td>
+                    {{/each}}
+                    {{/each}}
+                </tr>
+                {{/each}}
+            </table>
+        </div>
+
+        <div class="scroll-viewport">
+            <table id="cabinets" data-name="Проверка кабинетов">
+                <colgroup>
+                    <col>
+                    {{#each weekdays}}
+                    {{#each ../lessons as | lesson |}}
+                    <col style="min-width: 8ch; width: 8ch;">
+                    {{/each}}
+                    {{/each}}
+                </colgroup>
+                <tr>
+                    <th title="* Ничего не происходит? Кликните по названию группы или по любой ячейке под ним, чтобы выбрать её для редактирования. Тогда вы сможете взаимодействовать с этой таблицей!
+                    * Нужно отменить выбор? Наведите мышь на ненужную строчку в таблице сверху и кликните по ней!" class="sticky top-0 left-0 z-2 cell-hover-effect" rowspan="2"
+                        data-b-a-s="medium"></th>
+                    {{#each weekdays as | weekday |}}
+                    <th class="weekday sticky top-0" colspan="7"
+                        data-b-t-s="medium"
+                        data-b-r-s="medium"
+                        data-b-b-s="thin">{{weekday.name}}</th>
+                    {{/each}}
+                </tr>
+                <tr>
+                {{#each weekdays}}
+                {{#each ../lessons as | lesson |}}
+                    <th class="lesson sticky top-20"
+                        data-b-r-s="{{#if @last}}medium{{else}}thin{{/if}}"
+                        data-b-b-s="medium">{{lesson}}</th>
+                    {{/each}}
+                    {{/each}}
+                </tr>
+                {{#each cabinets.list as | cabinet c |}}
+                <tr>
+                    <th class="cabinet sticky left-0"
+                        data-b-r-s="medium"
+                        data-b-b-s="thin"
+                        data-b-l-s="medium">{{cabinet.number}}</th>
+                    {{#each ../weekdays as | weekday w |}}
+                    {{#each ../../lessons as | lesson |}}
+                    <td class="cell-hover-effect" data-weekday="{{w}}" data-lesson="{{lesson}}" data-type="c" data-cabinet="{{c}}"
+                        data-b-r-s="{{#if @last}}medium{{else}}thin{{/if}}"
+                        data-b-b-s="thin"><div class="elements-cell" data-part="1"></div><div class="elements-cell" data-part="0"></div><div class="elements-cell" data-part="2"></div>
+                    </td>
+                    {{/each}}
+                    {{/each}}
+                </tr>
+                {{/each}}
+            </table>
+        </div>
+    </script>
+    <!-- Главные панели программы  -->
+    <main id="main">
+    </main>
+    <header>
+        <div class="button button-hover-effect" id="new-schedule">Создать новое расписание</div>
+        <div class="button button-hover-effect" id="export-schedule">Расписание в Excel-файл</div>
+        <div class="button button-hover-effect" id="next-week" style="float: right;">Следующая</div>
+        <div class="button button-hover-effect" id="prev-week" style="float: right;">Предыдущая</div>
+        <div style="float: right;">Учебная неделя:</div>
+    </header>
+    <footer>
+        <div class="button button-hover-effect" id="to-editor">Редактировать данные</div>
+    </footer>
+    <!-- Скрыпты -->
+    <script src="../eel.js"></script>
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/jquery-ui.min.js"></script>
+    <script src="../js/handlebars.min.js"></script>
+    <script src="../js/tableToExcel.js"></script>
+    <script src="../js/data.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="js/scripts.js"></script>
+</body>
+
+</html>

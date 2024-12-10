@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="shortcut icon" href="../css/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Конструктор расписания КГПК - данные</title>
+</head>
+<body>
+    <!--  -->
+    <!--  -->
+    <!-- Форма для редактирование данных -->
+    <!--  -->
+
+    <script id="data-form" type="text/x-handlebars-template">
+        <form id="{{values.type}}">
+            {{#with values.cabinet}}
+            <h3 title="* Всё сохраняется автоматически">Кабинет</h3>
+            <input type="hidden" name="id" id="id" value="{{id}}">
+                <input type="text" name="number" id="number" value="{{#with (lookup ../cabinets.list id)}}{{number~}}{{/with}}" />
+                
+            {{/with}}
+            {{#with values.teacher as | teacher |}}
+            <h3 title="* Всё сохраняется автоматически">Преподаватель</h3>
+            <input type="hidden" name="id" id="id" value="{{id}}">
+                <input type="text" name="fio" id="fio" value="{{#with (lookup ../teachers.list id)}}{{fio~}}{{/with}}" />
+                <select name="cabinet" id="cabinet-list">
+                    <option value="" selected>Без кабинета</option>
+                    {{#each ../cabinets.list as | cabinet c |}}
+                    <option value="{{c}}">{{cabinet.number}}</option>
+                    {{/each}}
+                    {{#with (lookup ../teachers.list id)}}
+                    {{#with (lookup ../../cabinets.list cabinet) as | cabinet c |}}
+                    <option value="{{c}}" selected style="display: none;">{{cabinet.number}}</option>
+                    {{/with}}
+                    {{/with}}
+                </select>
+            {{/with}}
+            {{#with values.subject}}
+            <h3 title="* Всё сохраняется автоматически">Дисциплина</h3>
+            <input type="hidden" name="id" id="id" value="{{id}}">
+                <input type="text" name="title" id="title" value="{{#with (lookup ../subjects.list id)}}{{title}}{{/with}}" />
+            {{/with}}
+            {{#with values.teachers}}
+            <input type="hidden" name="group" id="group" value="{{group}}">
+            <input type="hidden" name="subject" id="subject" value="{{subject}}">
+                <h3 title="* Всё сохраняется автоматически">{{#with (lookup ../groups.list group)}}{{name}}: 
+                {{#with (lookup ../../subjects.list ../subject)}}{{title}}{{/with}}</h3>
+                <h2>Преподаватели</h2>
+                <ul id="subject-teachers">
+                    {{#with (lookup subjects ../subject)}}
+                    {{#each teachers as | teacher |}}
+                    {{#with (lookup ../../../../teachers.list teacher)}}
+                    <li data-teacher="{{teacher}}"><span class="erase cell-hover-effect delete-teacher"></span>
+                        <span class="handle"></span>{{fio}}</li>
+                    {{/with}}
+                    {{/each}}
+                    {{/with}}
+                </ul>
+                {{/with}}
+            <select name="teachers" id="teacher-list">
+                <option value="">Выберите преподавателя</option>
+                {{#each ../teachers.list as | teacher t |}}
+                <option value="{{t}}">{{teacher.fio}}</option>
+                {{/each}}
+            </select>
+            {{/with}}
+            <div>
+                <input class="button button-hover-effect" type="button" value="Вернуться" id="return">
+                <input class="passive-button button-hover-effect" type="button" value="Удалить" id="delete">
+            </div>
+        </form>
+    </script>
+    <!--  -->
+    <!--  -->
+    <!-- Список страниц в Excel-файле и положение групп -->
+    <!--  -->
+
+    <script id="sheets-list" type="text/x-handlebars-template">
+        <form id="sheets">
+            <h3 title="* Для того, чтобы добавить страницу - кликните по плюсику справа
+            * Для того, чтобы добавить группу - кликните по плюсику под названием страницы
+            * Всё сохраняется автоматически">Группы</h3>
+            <div class="scroll-viewport">
+                    <ul id="list">
+                        {{#each sheets.list as | sheet s |}}
+                        <li data-sheet="{{s}}">
+                            <span class="erase cell-hover-effect delete-sheet"></span><span class="title" contenteditable="true">{{sheet.title}}</span>
+                            <ul>
+                                {{#each sheet.groups as | group |}}
+                                {{#with (lookup ../../groups.list group)}}
+                                <li class="group" data-group="{{group}}">
+                                    <span class="erase cell-hover-effect delete-group"></span>
+                                    <span class="handle"></span>
+                                    <span class="name" contenteditable="true">{{name}}</span>
+                                </li>
+                                {{/with}}
+                                {{/each}}
+                            </ul>
+                            <div class="add button-hover-effect passive-button new-group"></div>
+                        </li>
+                        {{/each}}
+                        <div class="add button-hover-effect passive-button" id="new-sheet"></div>
+                    </ul>
+            </div>
+            <div>
+                <input class="passive-button button-hover-effect" type="button" value="Вернуться" id="return">
+            </div>
+        </form>
+    </script>
+    <!--  -->
+    <!--  -->
+    <!-- Экран для редактирования и просмотра данных -->
+    <!--  -->
+
+    <script id="data-editor" type="text/x-handlebars-template">
+        <div class="scroll-viewport">
+            <table>
+                <colgroup>
+                    <col style="min-width: min-content; width: min-content;">
+                    {{#each sheets.list as | sheet |}}
+                    {{#each sheet.groups as | group |}}
+                    <col style="min-width: 18ch; width: 18ch;">
+                    {{/each}}
+                    {{/each}}
+                </colgroup>
+                <tr>
+                    <th title="Кликните, чтобы добавить группы и направления (Excel-страницы)!" class="sticky z-2 top-0 left-0 cell-hover-effect sheet" rowspan="2"
+                        data-b-a-s="medium">
+                        Страницы
+                        <br>
+                        Группы
+                    </th>
+                    {{#each sheets.list as | sheet |}}
+                    <th class="sticky top-0 cell-hover-effect sheet" colspan="{{sheet.groups.length}}" style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;"
+                        data-b-t-s="medium"
+                        data-b-r-s="thin"
+                        data-b-b-s="thin">
+                        {{sheet.title}}
+                    </th>
+                    {{/each}}
+                </tr>
+                <tr>
+                    {{#each sheets.list as | sheet |}}
+                    {{#each sheet.groups as | group |}}
+                    {{#with (lookup ../../groups.list group)}}
+                    <th class="sticky top-20 cell-hover-effect editable sheet"
+                        data-group="{{group}}"
+                        data-b-r-s="thin"
+                        data-b-b-s="medium">
+                        {{name}}
+                    </th>
+                    {{/with}}
+                    {{/each}}
+                    {{/each}}
+                </tr>
+                {{#each subjects.list as | subject s |}}
+                <tr>
+                    <th class="sticky left-0 cell-hover-effect editable subject"
+                        data-subject="{{s}}"
+                        data-b-b-s="thin"
+                        data-b-r-s="medium"
+                        data-b-l-s="medium">
+                        {{subject.title}}
+                    </th>
+                    {{#each ../sheets.list as | sheet |}}
+                    {{#each sheet.groups as | group |}}
+                    <td class="cell-hover-effect teachers"
+                        data-group="{{group}}"
+                        data-subject="{{s}}"
+                        data-b-r-s="thin"
+                        data-b-b-s="thin">
+                        {{#with (lookup ../../../groups.list group)}}
+                        {{#with (lookup subjects s)}}
+                        {{#each teachers as | t |}}
+                        {{#with (lookup ../../../../../../teachers.list t)}}
+                        <div>
+                            {{fio}}
+                        </div>
+                        {{/with}}
+                        {{/each}}
+                        {{/with}}
+                        {{/with}}
+                    </td>
+                    {{/each}}
+                    {{/each}}
+                </tr>
+                {{/each}}
+                <tr>
+                    <th class="sticky left-0 bottom-0 z-2"
+                        data-b-t-s="thin"
+                        data-b-r-s="medium"
+                        data-b-b-s="thin"
+                        data-b-l-s="medium">
+                        <div title="Добавление новой дисциплины" class="add button-hover-effect passive-button" id="new-subject"></div>
+                    </th>
+                </tr>
+            </table>
+        </div>
+
+        <div class="scroll-viewport">
+            <table>
+                <tr>
+                    <th class="sticky top-0 z-2"
+                        data-b-b-s="medium">Преподаватели</th>
+                </tr>
+                {{#each teachers.list as | teacher t |}}
+                <tr>
+                    <td class="cell-hover-effect editable teacher"
+                        data-teacher="{{t}}"
+                        data-b-b-s="thin">
+                        <div>
+                            {{teacher.fio}}
+                        </div>
+                        <div data-a-h="right">
+                            {{#if teacher.cabinet}}
+                            в кабинете
+                            {{else}}
+                            без кабинета
+                            {{/if}}
+                            {{#with (lookup ../cabinets.list teacher.cabinet)}}
+                            {{number}}
+                            {{/with}}
+                        </div>
+                    </td>
+                </tr>
+                {{/each}}
+                <tr>
+                    <th class="sticky bottom-0 z-2"
+                        data-b-t-s="thin"
+                        data-b-b-s="thin">
+                        <div class="add button-hover-effect passive-button" id="new-teacher"></div>
+                    </th>
+                </tr>
+            </table>
+        </div>
+        
+        <div class="scroll-viewport">
+            <table>
+                <tr>
+                    <th class="sticky top-0 z-2"
+                        data-b-b-s="medium">Кабинет</th>
+                </tr>
+                {{#each cabinets.list as | caninet c |}}
+                <tr>
+                    <td class="cell-hover-effect editable cabinet"
+                        data-cabinet="{{c}}"
+                        data-b-b-s="thin">
+                        {{caninet.number}}
+                    </td>
+                </tr>
+                {{/each}}
+                <tr>
+                    <th class="sticky bottom-0 z-2"
+                        data-b-t-s="thin"
+                        data-b-b-s="thin">
+                        <div class="add button-hover-effect passive-button" id="new-cabinet"></div>
+                    </th>
+                </tr>
+            </table>
+        </div>
+    </script>
+    <!-- Главные панели программы  -->
+    <main id="main">
+    </main>
+    <footer>
+        <div class="button button-hover-effect" id="to-constructor">Редактировать расписание</div>
+    </footer>
+    <!-- Скрыпты -->
+    <script src="../eel.js"></script>
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/jquery-ui.min.js"></script>
+    <script src="../js/handlebars.min.js"></script>
+    <script src="../js/tableToExcel.js"></script>
+    <script src="../js/data.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="js/scripts.js"></script>
+</body>
+
+</html>

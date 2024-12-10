@@ -1,0 +1,123 @@
+.top-20 {
+    top: 20pt;
+}
+
+.top-40 {
+    top: 40pt;
+}
+
+.left-15 {
+    left: 14pt;
+}
+
+.left-30 {
+    left: 28.5pt;
+}
+
+[data-exclude="true"] {
+    opacity: 0.5;
+}
+
+.weekday-excluding::before {
+    content: "☑";
+    transform: scale(0.7);
+    float: right;
+    opacity: 0.5;
+}
+
+#teachers .teacher {
+    text-align: left;
+}
+
+#cabinets .cabinet, 
+#teachers .teacher {
+    text-wrap:nowrap;
+}
+
+
+:where(#teachers, #cabinets) td:has( 
+    .elements-cell:not(:empty) 
+    + .elements-cell:not(:empty) 
+    + .elements-cell:empty,
+    .elements-cell:empty 
+    + .elements-cell:not(:empty) 
+    + .elements-cell:not(:empty),
+    .elements-cell:not(:empty) 
+    + .elements-cell:empty 
+    + .elements-cell:not(:empty),
+    .elements-cell:not(:empty) 
+    + .elements-cell:not(:empty) 
+    + .elements-cell:not(:empty) 
+),
+:where(#teachers, #cabinets) .schedule-element:not(:only-of-type) { 
+    background-color: var(--red); 
+}
+
+:where(#teachers, #cabinets) td:has( 
+    .elements-cell:not(:empty) 
+    + .elements-cell:empty 
+    + .elements-cell:empty,
+    .elements-cell:empty 
+    + .elements-cell:not(:empty) 
+    + .elements-cell:empty,
+    .elements-cell:empty 
+    + .elements-cell:empty 
+    + .elements-cell:not(:empty) 
+) { 
+    background-color: var(--green); 
+}
+
+:where(#subjects, #teachers, #cabinets) .schedule-element {
+    text-align: center;
+}
+
+.schedule-sheet .schedule-element {
+    margin: 0 0.25em;
+}
+
+.schedule-sheet .schedule-element:hover {
+    text-decoration: line-through;
+    text-decoration-color: inherit;
+    text-decoration-thickness: 2px;
+}
+
+#anchor, 
+#pointer,
+tr:has(.display),
+.subject-list {
+    display: none;
+}
+
+td:has(> #anchor) {
+    background-color: var(--cell-active-color);
+}
+
+.subject-list:has( #pointer) {
+    display: table-row-group;
+}
+
+#main {
+    grid-template-columns: 30% auto auto auto;
+    grid-template-rows: 60% auto;
+}
+
+#main > .scroll-viewport:nth-child(1) {
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+}
+
+#main > .scroll-viewport:nth-child(2) {
+    grid-column: 2 / 5;
+    grid-row: 1 / 2;
+    display: flex;
+}
+
+#main > .scroll-viewport:nth-child(3) {
+    grid-column: 1 / 3;
+    grid-row: 2 / 3;
+}
+
+#main > .scroll-viewport:nth-child(4) {
+    grid-column: 3 / 5;
+    grid-row: 2 / 3;
+}

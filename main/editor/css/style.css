@@ -1,0 +1,119 @@
+input[type="button"], .passive-button {
+    padding: 5pt 10pt;
+}
+
+ul {
+    font-size: 13pt;
+    list-style-type: none;
+    position: relative;
+}
+
+#list {
+    display: flex;
+}
+
+#list > li {
+    width: 24ch;
+    min-width: 24ch;
+    padding: 0.25em;
+    border-left: 1px solid var(--border-color);
+}
+
+.handle {
+    cursor: pointer;
+}
+
+.handle::before {
+    content: " - ";
+    padding: 0.1em 0.5em;
+}
+
+.add::before {
+    content: " + ";
+    padding: 0.1em 0.5em;
+}
+
+.erase {
+    float: right;
+}
+
+.erase::before {
+    content: " ✖ ";
+    padding: 0 0.75em;
+    font-size: 8pt;
+    opacity: 0.3;
+}
+
+li:has( > .handle) {
+    text-wrap: nowrap;
+}
+
+td {
+    padding: 0.4em;
+}
+
+select, input[type="text"], #subject-teachers {
+    min-width: 32ch;
+}
+
+[data-a-text-rotation="90"] {
+    rotate: 180deg;
+    padding: 1em 0;
+}
+
+.top-20 {
+    top: 20pt;
+}
+
+.bottom-0 {
+    bottom: 0px;
+}
+
+#main {
+    padding-top: 3vmin;
+    grid-template-columns: auto min-content min-content;
+    grid-template-rows: auto;
+}
+
+#main > .scroll-viewport:nth-child(1) {
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+}
+
+#main > .scroll-viewport:nth-child(2) {
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
+}
+
+#main > .scroll-viewport:nth-child(3) {
+    grid-column: 3 / 4;
+    grid-row: 1 / 2;
+}
+
+.sheets-list .sheet .name, .groups-list div {
+    min-width: max-content;
+}
+
+#main:has(> form) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+form > * {
+    margin: 5pt 0;
+}
+
+form > .scroll-viewport {
+    height: 60vh;
+    max-width: 80vw;
+    border-width: 0 1px;
+    scroll-behavior: auto;
+}
